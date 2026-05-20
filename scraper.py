@@ -4,6 +4,7 @@ import pandas as pd
 import time
 import random
 import os
+import re
 
 print("🚀 Запуск обновленного парсера (RU/BY, 2026 год, <50k установок, Рейтинг 4.0+)...")
 
@@ -39,11 +40,13 @@ added_games = set()
 
 def parse_installs(installs_str):
     try:
-        return int(str(installs_str).replace("+", "").replace(",", ""))
-    except ValueError:
+        # Регулярное выражение \D удаляет ВСЕ символы, кроме цифр (пробелы, плюсы, буквы, запятые)
+        clean_str = re.sub(r'\D', '', str(installs_str))
+        return int(clean_str) if clean_str else 0
+    except Exception:
         return 0
 
-# 🔥 Исправленная функция сохранения (теперь стоит в правильном месте)
+# 🔥 Исправленная функция сохранения
 def save_to_excel():
     # Если данные есть - сохраняем их. Если нет - создаем пустую таблицу с заголовками.
     if scraped_data:
