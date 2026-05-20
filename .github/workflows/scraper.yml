@@ -28,4 +28,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CIS_Leads_Database # Название папки для скачивания
-          path: CIS_Games_2025_DeepSearch.xlsx # Имя файла, которое генерирует наш Python скрипт
+          path: Leads.xlsx # Сделали короткое и универсальное имя
