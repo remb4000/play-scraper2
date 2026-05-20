@@ -43,11 +43,17 @@ def parse_installs(installs_str):
     except ValueError:
         return 0
 
+# 🔥 Исправленная функция сохранения (теперь стоит в правильном месте)
 def save_to_excel():
+    # Если данные есть - сохраняем их. Если нет - создаем пустую таблицу с заголовками.
     if scraped_data:
         df = pd.DataFrame(scraped_data)
-        df.to_excel(FILENAME, index=False, engine='openpyxl')
+    else:
+        df = pd.DataFrame(columns=["Title", "Developer", "Email", "Website", "Installs", "Price", "Genre", "Rating", "Reviews", "Released", "Region", "URL"])
+    
+    df.to_excel(FILENAME, index=False, engine='openpyxl')
 
+# Главный цикл
 for country in COUNTRIES:
     print(f"\n🌍 === Регион: {country.upper()} ===")
     
@@ -125,6 +131,8 @@ for country in COUNTRIES:
 
                 scraped_data.append(game_info)
                 added_games.add(title)
+                
+                # 🔥 Вызываем сохранение после каждой добавленной игры
                 save_to_excel()
                 print("✅ ДОБАВЛЕНО И СОХРАНЕНО!")
 
@@ -134,4 +142,6 @@ for country in COUNTRIES:
                 print("Ошибка страницы ❌")
                 pass 
 
+# 🔥 Финальное сохранение, чтобы файл сгенерировался даже если игр 0
+save_to_excel()
 print(f"\n✅ Готово! Найдено крутых проектов: {len(scraped_data)}. Файл: {FILENAME}")
