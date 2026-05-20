@@ -12,7 +12,7 @@ COUNTRIES = ["ru", "by"]
 
 # 🛑 2. Обновленный черный список
 BLACKLIST = ["hypercasual", "slots", "clicker", "merge", "idle"]
-FILENAME = "RU_BY_Games_2026_Filtered.xlsx"
+FILENAME = "Leads.xlsx"
 
 if not os.path.exists("keywords.txt"):
     print("❌ Создай файл 'keywords.txt' и добавь туда запросы.")
