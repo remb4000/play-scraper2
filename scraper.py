@@ -6,10 +6,10 @@ import random
 import os
 import re
 
-print("🚀 Запуск обновленного парсера (RU/BY, 2026 год, <50k установок, Рейтинг 4.0+)...")
+print("🚀 Запуск обновленного парсера (RU/BY/KZ, 2026 год, <50k установок, Рейтинг 4.0+)...")
 
-# 🌍 1. Страны - Россия, Беларусь
-COUNTRIES = ["ru", "by"]
+# 🌍 1. Страны - Россия, Беларусь, Казахстан
+COUNTRIES = ["ru", "by", "kz"]
 
 # 🛑 2. Обновленный черный список
 BLACKLIST = ["hypercasual", "slots", "clicker", "merge", "idle"]
@@ -93,9 +93,10 @@ for country in COUNTRIES:
                     continue
 
                 # --- 2. Фильтр: ДО 50к установок ---
+                # Исправлено обратно на 50000 (у тебя случайно добавился лишний 0)
                 installs = details.get("installs", "0")
                 installs_num = parse_installs(installs)
-                if installs_num > 500000:
+                if installs_num > 50000:
                     print(f"Крупная ({installs}) ❌")
                     continue
 
