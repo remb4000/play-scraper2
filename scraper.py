@@ -95,7 +95,7 @@ for country in COUNTRIES:
                 # --- 2. Фильтр: ДО 50к установок ---
                 installs = details.get("installs", "0")
                 installs_num = parse_installs(installs)
-                if installs_num > 50000:
+                if installs_num > 500000:
                     print(f"Крупная ({installs}) ❌")
                     continue
 
