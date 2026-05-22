@@ -5,7 +5,7 @@ import time
 import random
 import os
 import re
-
+import requests # <--- Добавили эту строчку
 print("🚀 Запуск обновленного парсера (RU/BY/KZ, 2026 год, <50k установок, Рейтинг 4.0+)...")
 
 # 🌍 1. Страны - Россия, Беларусь, Казахстан
@@ -146,6 +146,31 @@ for country in COUNTRIES:
                 print("Ошибка страницы ❌")
                 pass 
 
-# 🔥 Финальное сохранение, чтобы файл сгенерировался даже если игр 0
+# Финальное сохранение
 save_to_excel()
 print(f"\n✅ Готово! Найдено крутых проектов: {len(scraped_data)}. Файл: {FILENAME}")
+
+# === ОТПРАВКА В TELEGRAM ===
+print("\n📤 Отправка файла в Telegram...")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+
+if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendDocument"
+        with open(FILENAME, 'rb') as f:
+            files = {'document': f}
+            data = {
+                'chat_id': TELEGRAM_CHAT_ID, 
+                'caption': f'🤖 Парсинг завершен!\n✅ Найдено проектов: {len(scraped_data)}'
+            }
+            response = requests.post(url, files=files, data=data)
+        
+        if response.status_code == 200:
+            print("✅ Файл успешно отправлен в Telegram!")
+        else:
+            print(f"❌ Ошибка отправки в Telegram. Код: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Ошибка при отправке файла: {e}")
+else:
+    print("⚠️ Токен бота или Chat ID не найдены в GitHub Secrets.")
