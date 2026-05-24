@@ -5,7 +5,8 @@ import time
 import random
 import os
 import re
-import requests # <--- Добавили эту строчку
+import requests
+
 print("🚀 Запуск обновленного парсера (RU/BY/KZ, 2026 год, <50k установок, Рейтинг 4.0+)...")
 
 # 🌍 1. Страны - Россия, Беларусь, Казахстан
@@ -40,7 +41,6 @@ added_games = set()
 
 def parse_installs(installs_str):
     try:
-        # Регулярное выражение \D удаляет ВСЕ символы, кроме цифр (пробелы, плюсы, буквы, запятые)
         clean_str = re.sub(r'\D', '', str(installs_str))
         return int(clean_str) if clean_str else 0
     except Exception:
@@ -48,7 +48,6 @@ def parse_installs(installs_str):
 
 # 🔥 Исправленная функция сохранения
 def save_to_excel():
-    # Если данные есть - сохраняем их. Если нет - создаем пустую таблицу с заголовками.
     if scraped_data:
         df = pd.DataFrame(scraped_data)
     else:
@@ -86,35 +85,29 @@ for country in COUNTRIES:
                     print("Уже в базе ❌")
                     continue
 
-                # --- 1. Фильтр: 2026 год ---
                 released = details.get("released", "")
                 if not released or "2026" not in str(released):
                     print(f"Не 2026 год ❌")
                     continue
 
-                # --- 2. Фильтр: ДО 50к установок ---
-                # Исправлено обратно на 50000 (у тебя случайно добавился лишний 0)
                 installs = details.get("installs", "0")
                 installs_num = parse_installs(installs)
                 if installs_num > 50000:
                     print(f"Крупная ({installs}) ❌")
                     continue
 
-                # --- 3. Фильтр: Качество (Рейтинг >= 4.0 и Отзывы >= 500) ---
                 rating = details.get("score", 0) or 0
                 reviews = details.get("ratings", 0) or 0
                 if rating < 4.0 or reviews < 500:
                     print(f"Не прошла по качеству ({round(rating, 1)}⭐, {reviews} отз.) ❌")
                     continue
 
-                # --- 4. Фильтр: Черный список ---
                 title_lower = title.lower()
                 summary_lower = details.get("summary", "").lower()
                 if any(word in title_lower or word in summary_lower for word in BLACKLIST):
                     print("В черном списке ❌")
                     continue
 
-                # --- 5. Сбор расширенных данных ---
                 price_val = details.get("price", 0)
                 price_str = "Free" if price_val == 0 else f"${price_val}"
 
@@ -136,7 +129,6 @@ for country in COUNTRIES:
                 scraped_data.append(game_info)
                 added_games.add(title)
                 
-                # 🔥 Вызываем сохранение после каждой добавленной игры
                 save_to_excel()
                 print("✅ ДОБАВЛЕНО И СОХРАНЕНО!")
 
@@ -146,7 +138,6 @@ for country in COUNTRIES:
                 print("Ошибка страницы ❌")
                 pass 
 
-# Финальное сохранение
 save_to_excel()
 print(f"\n✅ Готово! Найдено крутых проектов: {len(scraped_data)}. Файл: {FILENAME}")
 
