@@ -1,7 +1,9 @@
 name: Google Play Scraper
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Кнопка ручного запуска остается
+  schedule:
+    - cron: '0 9 * * *' # Автозапуск каждый день в 09:00 UTC (12:00 по МСК/Минску)
 
 jobs:
   scrape:
