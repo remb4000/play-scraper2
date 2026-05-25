@@ -7,34 +7,54 @@ import os
 import re
 import requests
 
-print("🚀 Запуск обновленного парсера (RU/BY/KZ, 2026 год, <50k установок, Рейтинг 4.0+)...")
+print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера (RU/BY/KZ, 2026 год, Ротация ключевых слов)...")
 
 # 🌍 1. Страны - Россия, Беларусь, Казахстан
 COUNTRIES = ["ru", "by", "kz"]
 
-# 🛑 2. Обновленный черный список
+# 🛑 2. Черный список жанров
 BLACKLIST = ["hypercasual", "slots", "clicker", "merge", "idle"]
 FILENAME = "Leads.xlsx"
 
-if not os.path.exists("keywords.txt"):
-    print("❌ Создай файл 'keywords.txt' и добавь туда запросы.")
-    exit()
+# 🧠 3. ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (из всех блоков, что мы обсуждали)
+KEYWORD_POOL = [
+    # Автомобильные / Физика
+    "шашки по городу", "оперская езда", "суета на дорогах", "краш тест", 
+    "разрушение машин", "парковка", "автошкола", "дальнобойщики", 
+    "внедорожники", "уличные гонки", "drag racing", "car crash", "дрифт", 
+    "jdm", "тюнинг", "физика", "автосимулятор", "реалистичная игра",
+    # Мидкор / Сленг / Механики
+    "рогалик", "выживач", "квест", "хоррор", "лутер", "гача", 
+    "защита башни", "ферма", "визуальная новелла", "метроидвания", 
+    "соулслайк", "тактика", "roguelike", "tower defense", "open world", 
+    "crafting", "pve", "tactical", "puzzle game", "story driven", "base building",
+    # Визуал / Стиль
+    "лоу поли", "low poly", "ragdoll", "мультяшная графика", "вид сверху", 
+    "изометрия", "атмосферная", "открытый мир", "текстовая", "свобода действий",
+    "пиксельная", "инди игра", "сюжетная", "песочница", "sandbox", "premium", "rpg",
+    # Классические широкие жанры
+    "симулятор", "стратегия", "ролевая игра", "экшен", "выживание", 
+    "головоломка", "гонки", "шутер", "платформер", "настольная игра",
+    # Сеттинги
+    "киберпанк", "зомби апокалипсис", "космос", "постапокалипсис", 
+    "фэнтези", "магия", "средневековье", "детектив"
+]
 
-with open("keywords.txt", "r", encoding="utf-8") as file:
-    base_queries = [line.strip() for line in file if line.strip()]
+# 🎰 МАГИЯ РОТАЦИИ: Каждый день скрипт выбирает 10 СЛУЧАЙНЫХ слов из банка выше
+base_queries = random.sample(KEYWORD_POOL, 10)
 
-if not base_queries:
-    print("❌ Файл 'keywords.txt' пуст.")
-    exit()
+print(f"🎲 Сегодня кубик Рубика выбрал следующие 10 базовых слов для поиска:")
+for word in base_queries:
+    print(f"  • {word}")
 
-# ASO-мультипликатор для глубокого поиска
+# ASO-мультипликатор для глубокого поиска (из 10 слов делает 70 запросов)
 modifiers = ["", " 2026", " 3d", " a", " b", " simulator", " pro"]
 deep_queries = []
 for q in base_queries:
     for mod in modifiers:
         deep_queries.append(q + mod)
 
-print(f"📁 Базовых запросов: {len(base_queries)}. С учетом ASO-мультипликатора: {len(deep_queries)}.")
+print(f"\n📁 С учетом ASO-мультипликатора создано: {len(deep_queries)} глубоких запросов.")
 
 scraped_data = []
 added_games = set()
@@ -46,16 +66,14 @@ def parse_installs(installs_str):
     except Exception:
         return 0
 
-# 🔥 Исправленная функция сохранения
 def save_to_excel():
     if scraped_data:
         df = pd.DataFrame(scraped_data)
     else:
         df = pd.DataFrame(columns=["Title", "Developer", "Email", "Website", "Installs", "Price", "Genre", "Rating", "Reviews", "Released", "Region", "URL"])
-    
     df.to_excel(FILENAME, index=False, engine='openpyxl')
 
-# Главный цикл
+# Главный цикл парсинга
 for country in COUNTRIES:
     print(f"\n🌍 === Регион: {country.upper()} ===")
     
@@ -153,10 +171,9 @@ if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
             files = {'document': f}
             data = {
                 'chat_id': TELEGRAM_CHAT_ID, 
-                'caption': f'🤖 Парсинг завершен!\n✅ Найдено проектов: {len(scraped_data)}'
+                'caption': f'🤖 Ежедневный отчет сформирован!\n🎲 Использованы новые случайные ключевые слова.\n✅ Найдено проектов: {len(scraped_data)}'
             }
             response = requests.post(url, files=files, data=data)
-        
         if response.status_code == 200:
             print("✅ Файл успешно отправлен в Telegram!")
         else:
