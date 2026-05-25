@@ -13,7 +13,7 @@ print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера (RU/BY
 COUNTRIES = ["ru", "by", "kz"]
 
 # 🛑 2. Черный список жанров
-BLACKLIST = ["hypercasual", "slots", "clicker", "merge", "idle"]
+BLACKLIST = ["slots"]
 FILENAME = "Leads.xlsx"
 
 # 🧠 3. ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (из всех блоков, что мы обсуждали)
