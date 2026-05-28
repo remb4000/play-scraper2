@@ -5,10 +5,10 @@ import time
 import random
 import os
 import re
-
+import datetime # 
 print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2026 год, <50k установок, Ротация слов)...")
 
-BLACKLIST = ["hypercasual", "slots", "clicker", "merge", "idle", "казино", "слоты"]
+BLACKLIST = ["slots"]
 FILENAME = "RuStore_Leads.xlsx"
 
 # 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (Топ-130+ популярных запросов СНГ)
@@ -30,7 +30,7 @@ KEYWORD_POOL = [
     "антистресс", "поп ит", "прятки", "платформер", "аркада",
 
     # 🏰 РПГ, Стратегии, Мидкор
-    "рпг", "rpg", "ролевая", "магия", "драконы", "подземелья", "аниме",
+    "рпг", "rpg", "ролевая", "магия", "драконы", "подземелья", "аниме","майн" , "майнкрафт" , "обби" , "обби паркур" , "обби лава " , "роблокс" , 
     "открытый мир", "стратегия", "защита башни", "tower defense", "ферма",
     "магнат", "бизнес", "тактика", "рогалик", "гача", "метроидвания",
 
@@ -52,15 +52,24 @@ KEYWORD_POOL = [
     "киберпанк", "космос", "фэнтези", "средневековье"
 ]
 
-# 🎰 Выбираем 5 случайных базовых слов на сегодня (для RuStore этого хватит)
-base_queries = random.sample(KEYWORD_POOL, 5)
+# 📅 УМНАЯ ОЧЕРЕДЬ: Берем слова строго по порядку каждый день
+WORDS_PER_DAY = 10
+total_words = len(KEYWORD_POOL)
 
-print(f"🎲 Сегодня кубик Рубика выбрал следующие слова для поиска:")
+# Получаем уникальный непрерывный номер сегодняшнего дня
+current_day = datetime.date.today().toordinal() 
+
+# Вычисляем индекс, с которого стартуем сегодня
+start_index = (current_day * WORDS_PER_DAY) % total_words
+
+# Собираем слова, плавно переходя в начало списка, если дошли до конца
+base_queries = [KEYWORD_POOL[(start_index + i) % total_words] for i in range(WORDS_PER_DAY)]
+
+print(f"📅 Алгоритм очереди: сегодня берем слова с {start_index + 1} по {(start_index + WORDS_PER_DAY)} из {total_words}:")
 for word in base_queries:
     print(f"  • {word}")
-
 # Добавляем ASO-модификаторы
-modifiers = ["", " 3d", " 2026", " симулятор", " онлайн", " 2d"]
+modifiers = ["", " 2026", " 3d", " a", " b", " simulator", " pro" , " online" , " free" , " онлайн" , " симулятор" , " бесплатно"]
 deep_queries = [q + mod for q in base_queries for mod in modifiers]
 
 print(f"\n📁 Создано {len(deep_queries)} глубоких запросов для RuStore API.")
