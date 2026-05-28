@@ -1,0 +1,26 @@
+name: RuStore Scraper
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 11 * * *' # Автозапуск в 14:00 по МСК
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pandas openpyxl requests
+      - env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python rustore_scraper.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RuStore_Leads
+          path: RuStore_Leads.xlsx
