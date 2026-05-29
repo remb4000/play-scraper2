@@ -148,8 +148,19 @@ for query in deep_queries:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
-            rating = details.get('rating', 0) or 0
-            reviews = details.get('reviewCount', 0) or 0
+          # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ РЕЙТИНГА И ОТЗЫВОВ (Защита от API RuStore)
+            try:
+                raw_rating = details.get('rating', 0)
+                rating = float(raw_rating) if not isinstance(raw_rating, dict) else float(raw_rating.get('rating', raw_rating.get('average', 0)))
+            except Exception:
+                rating = 0.0
+
+            try:
+                raw_reviews = details.get('reviewCount', 0)
+                reviews = int(raw_reviews) if not isinstance(raw_reviews, dict) else int(raw_reviews.get('count', 0))
+            except Exception:
+                reviews = 0
+
             if rating < 2.0 or reviews < 1:
                 print(f"Слабая ({round(rating, 1)}⭐, {reviews} отз.) ❌")
                 continue
