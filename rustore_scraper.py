@@ -115,7 +115,7 @@ for query in deep_queries:
         # 🔥 ИСПРАВЛЕНИЕ: Теперь игры лежат в 'content', а не 'applications'
         apps = search_data.get('body', {}).get('content', [])
         time.sleep(random.uniform(1.0, 2.0)) 
-    except Exception as e:
+    pt Exception as e:
         print(f"❌ Ошибка соединения при поиске: {e}")
         continue
 
@@ -194,8 +194,8 @@ for query in deep_queries:
 
             time.sleep(random.uniform(0.5, 1.5))
 
-        except Exception:
-            print("Ошибка страницы ❌")
+       except Exception as e:
+            print(f"Ошибка страницы ❌ (Причина: {e})")
             pass
 
 save_to_excel()
