@@ -7,20 +7,20 @@ import os
 import re
 import datetime
 
-print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, без фильтра по рейтингу, <500k установок)...")
+print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, Сбор по истории версий)...")
 
 BLACKLIST = ["slots"]
 FILENAME = "RuStore_Leads.xlsx"
 
-# 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ
+# 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (Топ-130+ популярных запросов СНГ)
 KEYWORD_POOL = [
-    # 🚗 Топ-запросы
+    # 🚗 Топ-запросы (Машины, симуляторы вождения, суета)
     "гонки", "шашки по городу", "оперская", "опер стайл", "суета", "русские тачки",
     "ваз", "лада", "нива", "уаз", "бпан", "краш тест", "разрушение", "дрифт",
     "дрифтинг", "jdm", "тюнинг", "парковка 3d", "симулятор вождения", "автошкола",
     "дальнобойщики", "камаз", "грузовики", "бездорожье", "4x4", "оффроуд", "автосимулятор",
 
-    # 🔫 Экшен, Шутеры, Выживание
+    # 🔫 Экшен, Шутеры, Выживание (Очень высокий трафик)
     "стрелялки", "шутер", "снайпер", "спецназ", "война", "оружие", "танки",
     "битва", "онлайн шутер", "королевская битва", "выживание", "выживач", "зомби",
     "сталкер", "постапокалипсис", "чернобыль", "мафия", "бандиты", "гта", "fps",
@@ -65,7 +65,6 @@ print(f"📅 Алгоритм очереди: сегодня берем слов
 for word in base_queries:
     print(f"  • {word}")
     
-# 🔥 ИСПРАВЛЕНИЕ: Заменили 2026 на 2025 в модификаторах
 modifiers = ["", " 2025", " 3d", " a", " b", " simulator", " pro", " online", " free", " онлайн", " симулятор", " бесплатно"]
 deep_queries = [q + mod for q in base_queries for mod in modifiers]
 
@@ -99,13 +98,12 @@ for query in deep_queries:
     search_url = "https://backapi.rustore.ru/applicationData/apps"
     search_params = {
         "query": query,
-        "pageSize": 80,
+        "pageSize": 50,  # Глубокий поиск
         "pageNumber": 0
     }
     
     try:
         response = requests.get(search_url, params=search_params, headers=HEADERS, timeout=10)
-        
         if response.status_code != 200:
             print(f"❌ Сервер RuStore заблокировал запрос (Код {response.status_code}). Ждем 5 сек...")
             time.sleep(5)
@@ -129,7 +127,6 @@ for query in deep_queries:
         details_url = f"https://backapi.rustore.ru/applicationData/overallInfo/{package_name}"
         try:
             res_details = requests.get(details_url, headers=HEADERS, timeout=10)
-            
             if res_details.status_code != 200:
                 continue
                 
@@ -148,7 +145,7 @@ for query in deep_queries:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
-            # Парсим рейтинг и отзывы только для записи в таблицу, но больше не блокируем по ним игру
+            # Безопасный сбор рейтинга и отзывов
             try:
                 raw_rating = details.get('rating', 0)
                 rating = float(raw_rating) if not isinstance(raw_rating, dict) else float(raw_rating.get('rating', raw_rating.get('average', 0)))
@@ -161,25 +158,23 @@ for query in deep_queries:
             except Exception:
                 reviews = 0
 
-          # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ ДАТЫ (Понимает и текст, и машинный код)
-            raw_date = details.get('firstPublishDate', '')
+            # 🔥 ИСПРАВЛЕНИЕ: Ищем дату во всех полях (сначала в истории версий versionDate)
+            raw_date = details.get('versionDate') or details.get('firstPublishDate') or details.get('modifyDate', '')
             game_year = "Unknown"
             
             if raw_date:
                 try:
                     if isinstance(raw_date, (int, float)):
-                        # Если RuStore отдал дату в миллисекундах
                         ts = raw_date / 1000 if raw_date > 10000000000 else raw_date
                         game_year = str(datetime.datetime.fromtimestamp(ts).year)
                     else:
-                        # Если RuStore отдал строку
                         game_year = str(raw_date)[:4]
                 except Exception:
                     pass
 
-            # Фильтр по году
+            # Фильтр по году (теперь проверяет год обновления/релиза)
             if game_year != "2025":
-                print(f"Не тот год ({game_year}) ❌")
+                print(f"Не 2025 год ({game_year}) ❌")
                 continue
 
             description = details.get('shortDescription', '').lower()
@@ -204,7 +199,7 @@ for query in deep_queries:
                 "Installs": installs,
                 "Rating": round(rating, 2),
                 "Reviews": reviews,
-                "Released": str(release_date)[:10],
+                "Released": str(raw_date)[:10] if raw_date else "2025",
                 "URL": f"https://apps.rustore.ru/app/{package_name}"
             }
 
@@ -237,7 +232,7 @@ if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
             files = {'document': f}
             data = {
                 'chat_id': TELEGRAM_CHAT_ID, 
-                'caption': f'🟢 [RuStore] Парсинг завершен!\n🎲 Использованы новые случайные слова.\n✅ Найдено лидов: {len(scraped_data)}'
+                'caption': f'🟢 [RuStore] Парсинг завершен!\n📅 Год: 2025 (По истории версий).\n✅ Найдено лидов: {len(scraped_data)}'
             }
             response = requests.post(url, files=files, data=data)
         if response.status_code == 200:
