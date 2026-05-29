@@ -7,20 +7,20 @@ import os
 import re
 import datetime
 
-print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2026 год, <500k установок, Ротация слов)...")
+print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, без фильтра по рейтингу, <500k установок)...")
 
 BLACKLIST = ["slots"]
 FILENAME = "RuStore_Leads.xlsx"
 
-# 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (Топ-130+ популярных запросов СНГ)
+# 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ
 KEYWORD_POOL = [
-    # 🚗 Топ-запросы (Машины, симуляторы вождения, суета)
+    # 🚗 Топ-запросы
     "гонки", "шашки по городу", "оперская", "опер стайл", "суета", "русские тачки",
     "ваз", "лада", "нива", "уаз", "бпан", "краш тест", "разрушение", "дрифт",
     "дрифтинг", "jdm", "тюнинг", "парковка 3d", "симулятор вождения", "автошкола",
     "дальнобойщики", "камаз", "грузовики", "бездорожье", "4x4", "оффроуд", "автосимулятор",
 
-    # 🔫 Экшен, Шутеры, Выживание (Очень высокий трафик)
+    # 🔫 Экшен, Шутеры, Выживание
     "стрелялки", "шутер", "снайпер", "спецназ", "война", "оружие", "танки",
     "битва", "онлайн шутер", "королевская битва", "выживание", "выживач", "зомби",
     "сталкер", "постапокалипсис", "чернобыль", "мафия", "бандиты", "гта", "fps",
@@ -65,7 +65,8 @@ print(f"📅 Алгоритм очереди: сегодня берем слов
 for word in base_queries:
     print(f"  • {word}")
     
-modifiers = ["", " 2026", " 3d", " a", " b", " simulator", " pro", " online", " free", " онлайн", " симулятор", " бесплатно"]
+# 🔥 ИСПРАВЛЕНИЕ: Заменили 2026 на 2025 в модификаторах
+modifiers = ["", " 2025", " 3d", " a", " b", " simulator", " pro", " online", " free", " онлайн", " симулятор", " бесплатно"]
 deep_queries = [q + mod for q in base_queries for mod in modifiers]
 
 print(f"\n📁 Создано {len(deep_queries)} глубоких запросов для RuStore API.")
@@ -95,7 +96,6 @@ def save_to_excel():
 for query in deep_queries:
     print(f"\n📡 Ищем: '{query}' ...")
     
-    # 🔥 ИСПРАВЛЕНИЕ: Новый API-адрес RuStore
     search_url = "https://backapi.rustore.ru/applicationData/apps"
     search_params = {
         "query": query,
@@ -148,7 +148,7 @@ for query in deep_queries:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
-        # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ РЕЙТИНГА И ОТЗЫВОВ
+            # Парсим рейтинг и отзывы только для записи в таблицу, но больше не блокируем по ним игру
             try:
                 raw_rating = details.get('rating', 0)
                 rating = float(raw_rating) if not isinstance(raw_rating, dict) else float(raw_rating.get('rating', raw_rating.get('average', 0)))
@@ -161,15 +161,10 @@ for query in deep_queries:
             except Exception:
                 reviews = 0
 
-            # 🔥 Убрали фильтр по отзывам. 
-            # Теперь пропускаем игры без оценок (rating 0.0), но отсеиваем реально плохие (от 0.1 до 1.9)
-            if rating > 0 and rating < 2.0:
-                print(f"Слабая ({round(rating, 1)}⭐) ❌")
-                continue
-
+            # 🔥 ИСПРАВЛЕНИЕ: Проверяем на 2025 год вместо 2026
             release_date = details.get('firstPublishDate', '')
-            if "2026" not in str(release_date):
-                print(f"Не 2026 год ❌")
+            if "2025" not in str(release_date):
+                print(f"Не 2025 год ❌")
                 continue
 
             description = details.get('shortDescription', '').lower()
