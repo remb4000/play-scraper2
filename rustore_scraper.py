@@ -131,14 +131,14 @@ for query in deep_queries:
 
             # Фильтр: Количество скачиваний (RuStore отдает точное число)
             installs = details.get('downloads', 0)
-            if installs > 50000:
+            if installs > 500000:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
             # Фильтр: Рейтинг и Отзывы
             rating = details.get('rating', 0) or 0
             reviews = details.get('reviewCount', 0) or 0
-            if rating < 4.0 or reviews < 100: # Для RuStore планку отзывов лучше снизить до 100
+            if rating < 2.0 or reviews < 1: # Для RuStore планку отзывов лучше снизить до 100
                 print(f"Слабая ({round(rating, 1)}⭐, {reviews} отз.) ❌")
                 continue
 
