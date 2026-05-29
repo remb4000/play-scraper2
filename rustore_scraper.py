@@ -6,21 +6,22 @@ import random
 import os
 import re
 import datetime
+import json  # 🔥 Новая библиотека для глубокого сканирования
 
-print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, Сбор по истории версий)...")
+print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, Умный сканер дат, <500k установок)...")
 
 BLACKLIST = ["slots"]
 FILENAME = "RuStore_Leads.xlsx"
 
 # 🧠 ГИГАНТСКИЙ БАНК КЛЮЧЕВЫХ СЛОВ (Топ-130+ популярных запросов СНГ)
 KEYWORD_POOL = [
-    # 🚗 Топ-запросы (Машины, симуляторы вождения, суета)
+    # 🚗 Топ-запросы
     "гонки", "шашки по городу", "оперская", "опер стайл", "суета", "русские тачки",
     "ваз", "лада", "нива", "уаз", "бпан", "краш тест", "разрушение", "дрифт",
     "дрифтинг", "jdm", "тюнинг", "парковка 3d", "симулятор вождения", "автошкола",
     "дальнобойщики", "камаз", "грузовики", "бездорожье", "4x4", "оффроуд", "автосимулятор",
 
-    # 🔫 Экшен, Шутеры, Выживание (Очень высокий трафик)
+    # 🔫 Экшен, Шутеры, Выживание
     "стрелялки", "шутер", "снайпер", "спецназ", "война", "оружие", "танки",
     "битва", "онлайн шутер", "королевская битва", "выживание", "выживач", "зомби",
     "сталкер", "постапокалипсис", "чернобыль", "мафия", "бандиты", "гта", "fps",
@@ -98,12 +99,13 @@ for query in deep_queries:
     search_url = "https://backapi.rustore.ru/applicationData/apps"
     search_params = {
         "query": query,
-        "pageSize": 50,  # Глубокий поиск
+        "pageSize": 50,  # Оставляем глубину 50 для максимального охвата
         "pageNumber": 0
     }
     
     try:
         response = requests.get(search_url, params=search_params, headers=HEADERS, timeout=10)
+        
         if response.status_code != 200:
             print(f"❌ Сервер RuStore заблокировал запрос (Код {response.status_code}). Ждем 5 сек...")
             time.sleep(5)
@@ -127,6 +129,7 @@ for query in deep_queries:
         details_url = f"https://backapi.rustore.ru/applicationData/overallInfo/{package_name}"
         try:
             res_details = requests.get(details_url, headers=HEADERS, timeout=10)
+            
             if res_details.status_code != 200:
                 continue
                 
@@ -145,7 +148,7 @@ for query in deep_queries:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
-            # Безопасный сбор рейтинга и отзывов
+            # Парсинг рейтинга
             try:
                 raw_rating = details.get('rating', 0)
                 rating = float(raw_rating) if not isinstance(raw_rating, dict) else float(raw_rating.get('rating', raw_rating.get('average', 0)))
@@ -158,25 +161,47 @@ for query in deep_queries:
             except Exception:
                 reviews = 0
 
-            # 🔥 ИСПРАВЛЕНИЕ: Ищем дату во всех полях (сначала в истории версий versionDate)
-            raw_date = details.get('versionDate') or details.get('firstPublishDate') or details.get('modifyDate', '')
+            # 🔥 БРОНЕБОЙНЫЙ ПОИСК ДАТЫ (Ищет везде, на любой глубине JSON)
+            details_str = json.dumps(details)
             game_year = "Unknown"
+            release_date_for_excel = "2025"
             
-            if raw_date:
-                try:
-                    if isinstance(raw_date, (int, float)):
-                        ts = raw_date / 1000 if raw_date > 10000000000 else raw_date
-                        game_year = str(datetime.datetime.fromtimestamp(ts).year)
-                    else:
-                        game_year = str(raw_date)[:4]
-                except Exception:
-                    pass
+            # 1. Сначала ищем дату в явном текстовом виде ("YYYY-MM-DD")
+            full_string_dates = re.findall(r'"((202\d)-\d{2}-\d{2})', details_str)
+            if full_string_dates:
+                years_found = [match[1] for match in full_string_dates]
+                if "2025" in years_found:
+                    game_year = "2025"
+                    # Вытаскиваем точную дату для отчета
+                    for match in full_string_dates:
+                        if match[1] == "2025":
+                            release_date_for_excel = match[0]
+                            break
+                else:
+                    game_year = years_found[0]
+            
+            # 2. Если текста нет, ищем системное время RuStore (13-значные миллисекунды)
+            if game_year == "Unknown":
+                timestamps = re.findall(r'\b(1[67]\d{11})\b', details_str)
+                for ts in timestamps:
+                    try:
+                        date_obj = datetime.datetime.fromtimestamp(int(ts) / 1000)
+                        year = date_obj.year
+                        if year == 2025:
+                            game_year = "2025"
+                            release_date_for_excel = date_obj.strftime('%Y-%m-%d')
+                            break
+                        elif 2020 <= year <= 2030:
+                            game_year = str(year)
+                    except:
+                        pass
 
-            # Фильтр по году (теперь проверяет год обновления/релиза)
+            # Финальная блокировка
             if game_year != "2025":
                 print(f"Не 2025 год ({game_year}) ❌")
                 continue
 
+            # Проверка черного списка
             description = details.get('shortDescription', '').lower()
             if any(word in title.lower() or word in description for word in BLACKLIST):
                 print("В черном списке ❌")
@@ -199,7 +224,7 @@ for query in deep_queries:
                 "Installs": installs,
                 "Rating": round(rating, 2),
                 "Reviews": reviews,
-                "Released": str(raw_date)[:10] if raw_date else "2025",
+                "Released": release_date_for_excel,
                 "URL": f"https://apps.rustore.ru/app/{package_name}"
             }
 
@@ -232,7 +257,7 @@ if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
             files = {'document': f}
             data = {
                 'chat_id': TELEGRAM_CHAT_ID, 
-                'caption': f'🟢 [RuStore] Парсинг завершен!\n📅 Год: 2025 (По истории версий).\n✅ Найдено лидов: {len(scraped_data)}'
+                'caption': f'🟢 [RuStore] Парсинг завершен!\n📅 Год: 2025 (Глубокий сканер).\n✅ Найдено лидов: {len(scraped_data)}'
             }
             response = requests.post(url, files=files, data=data)
         if response.status_code == 200:
