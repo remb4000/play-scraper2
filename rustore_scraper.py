@@ -148,7 +148,7 @@ for query in deep_queries:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
-          # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ РЕЙТИНГА И ОТЗЫВОВ (Защита от API RuStore)
+        # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ РЕЙТИНГА И ОТЗЫВОВ
             try:
                 raw_rating = details.get('rating', 0)
                 rating = float(raw_rating) if not isinstance(raw_rating, dict) else float(raw_rating.get('rating', raw_rating.get('average', 0)))
@@ -161,8 +161,10 @@ for query in deep_queries:
             except Exception:
                 reviews = 0
 
-            if rating < 2.0 or reviews < 1:
-                print(f"Слабая ({round(rating, 1)}⭐, {reviews} отз.) ❌")
+            # 🔥 Убрали фильтр по отзывам. 
+            # Теперь пропускаем игры без оценок (rating 0.0), но отсеиваем реально плохие (от 0.1 до 1.9)
+            if rating > 0 and rating < 2.0:
+                print(f"Слабая ({round(rating, 1)}⭐) ❌")
                 continue
 
             release_date = details.get('firstPublishDate', '')
