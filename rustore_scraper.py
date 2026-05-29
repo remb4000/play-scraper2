@@ -99,7 +99,7 @@ for query in deep_queries:
     search_url = "https://backapi.rustore.ru/applicationData/apps"
     search_params = {
         "query": query,
-        "pageSize": 20,
+        "pageSize": 80,
         "pageNumber": 0
     }
     
@@ -161,10 +161,25 @@ for query in deep_queries:
             except Exception:
                 reviews = 0
 
-            # 🔥 ИСПРАВЛЕНИЕ: Проверяем на 2025 год вместо 2026
-            release_date = details.get('firstPublishDate', '')
-            if "2025" not in str(release_date):
-                print(f"Не 2025 год ❌")
+          # 🔥 БЕЗОПАСНЫЙ ПАРСИНГ ДАТЫ (Понимает и текст, и машинный код)
+            raw_date = details.get('firstPublishDate', '')
+            game_year = "Unknown"
+            
+            if raw_date:
+                try:
+                    if isinstance(raw_date, (int, float)):
+                        # Если RuStore отдал дату в миллисекундах
+                        ts = raw_date / 1000 if raw_date > 10000000000 else raw_date
+                        game_year = str(datetime.datetime.fromtimestamp(ts).year)
+                    else:
+                        # Если RuStore отдал строку
+                        game_year = str(raw_date)[:4]
+                except Exception:
+                    pass
+
+            # Фильтр по году
+            if game_year != "2025":
+                print(f"Не тот год ({game_year}) ❌")
                 continue
 
             description = details.get('shortDescription', '').lower()
