@@ -31,7 +31,7 @@ KEYWORD_POOL = [
     "антистресс", "поп ит", "прятки", "платформер", "аркада",
 
     # 🏰 РПГ, Стратегии, Мидкор
-    "рпг", "rpg", "ролевая", "магия", "драконы", "подземелья", "аниме","майн", "майнкрафт", "обби", "обби паркур", "обби лава", "роблокс", 
+    "рпг", "rpg", "ролевая", "магия", "драконы", "подземелья", "аниме", "майн", "майнкрафт", "обби", "обби паркур", "обби лава", "роблокс", 
     "открытый мир", "стратегия", "защита башни", "tower defense", "ферма",
     "магнат", "бизнес", "тактика", "рогалик", "гача", "метроидвания",
 
@@ -99,8 +99,8 @@ for query in deep_queries:
     search_url = "https://backapi.rustore.ru/applicationData/apps"
     search_params = {
         "query": query,
-        "pageSize": 20,     # раньше было limit
-        "pageNumber": 0     # раньше было offset
+        "pageSize": 20,
+        "pageNumber": 0
     }
     
     try:
@@ -112,10 +112,9 @@ for query in deep_queries:
             continue
             
         search_data = response.json()
-        # 🔥 ИСПРАВЛЕНИЕ: Теперь игры лежат в 'content', а не 'applications'
         apps = search_data.get('body', {}).get('content', [])
         time.sleep(random.uniform(1.0, 2.0)) 
-    pt Exception as e:
+    except Exception as e:
         print(f"❌ Ошибка соединения при поиске: {e}")
         continue
 
@@ -194,7 +193,7 @@ for query in deep_queries:
 
             time.sleep(random.uniform(0.5, 1.5))
 
-       except Exception as e:
+        except Exception as e:
             print(f"Ошибка страницы ❌ (Причина: {e})")
             pass
 
