@@ -8,7 +8,7 @@ import re
 import datetime
 import json  # 🔥 Новая библиотека для глубокого сканирования
 
-print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2025 год, Умный сканер дат, <500k установок)...")
+print("🚀 Запуск СУПЕР-АВТОНОМНОГО парсера RuStore (2026 год, Умный сканер дат, <100k установок)...")
 
 BLACKLIST = ["slots"]
 FILENAME = "RuStore_Leads.xlsx"
@@ -66,7 +66,7 @@ print(f"📅 Алгоритм очереди: сегодня берем слов
 for word in base_queries:
     print(f"  • {word}")
     
-modifiers = ["", " 2025", " 3d", " a", " b", " simulator", " pro", " online", " free", " онлайн", " симулятор", " бесплатно"]
+modifiers = ["", " 2026", " 3d", " a", " b", " simulator", " pro", " online", " free", " онлайн", " симулятор", " бесплатно"]
 deep_queries = [q + mod for q in base_queries for mod in modifiers]
 
 print(f"\n📁 Создано {len(deep_queries)} глубоких запросов для RuStore API.")
@@ -144,7 +144,7 @@ for query in deep_queries:
                 continue
 
             installs = details.get('downloads', 0)
-            if installs > 500000:
+            if installs > 100000:
                 print(f"Крупная ({installs}) ❌")
                 continue
 
@@ -164,17 +164,17 @@ for query in deep_queries:
             # 🔥 БРОНЕБОЙНЫЙ ПОИСК ДАТЫ (Ищет везде, на любой глубине JSON)
             details_str = json.dumps(details)
             game_year = "Unknown"
-            release_date_for_excel = "2025"
+            release_date_for_excel = "2026"
             
             # 1. Сначала ищем дату в явном текстовом виде ("YYYY-MM-DD")
             full_string_dates = re.findall(r'"((202\d)-\d{2}-\d{2})', details_str)
             if full_string_dates:
                 years_found = [match[1] for match in full_string_dates]
-                if "2025" in years_found:
-                    game_year = "2025"
+                if "2026" in years_found:
+                    game_year = "2026"
                     # Вытаскиваем точную дату для отчета
                     for match in full_string_dates:
-                        if match[1] == "2025":
+                        if match[1] == "2026":
                             release_date_for_excel = match[0]
                             break
                 else:
@@ -187,8 +187,8 @@ for query in deep_queries:
                     try:
                         date_obj = datetime.datetime.fromtimestamp(int(ts) / 1000)
                         year = date_obj.year
-                        if year == 2025:
-                            game_year = "2025"
+                        if year == 2026:
+                            game_year = "2026"
                             release_date_for_excel = date_obj.strftime('%Y-%m-%d')
                             break
                         elif 2020 <= year <= 2030:
@@ -197,8 +197,8 @@ for query in deep_queries:
                         pass
 
             # Финальная блокировка
-            if game_year != "2025":
-                print(f"Не 2025 год ({game_year}) ❌")
+            if game_year != "2026":
+                print(f"Не 2026 год ({game_year}) ❌")
                 continue
 
             # Проверка черного списка
@@ -257,7 +257,7 @@ if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
             files = {'document': f}
             data = {
                 'chat_id': TELEGRAM_CHAT_ID, 
-                'caption': f'🟢 [RuStore] Парсинг завершен!\n📅 Год: 2025 (Глубокий сканер).\n✅ Найдено лидов: {len(scraped_data)}'
+                'caption': f'🟢 [RuStore] Парсинг завершен!\n📅 Год: 2026 (Глубокий сканер).\n✅ Найдено лидов: {len(scraped_data)}'
             }
             response = requests.post(url, files=files, data=data)
         if response.status_code == 200:
