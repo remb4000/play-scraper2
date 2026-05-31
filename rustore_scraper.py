@@ -207,14 +207,20 @@ for query in deep_queries:
                 print("В черном списке ❌")
                 continue
 
-            developer_name = details.get('companyName', '')
-            email = details.get('ownerEmail', '')
+         developer_name = details.get('companyName', '')
             website = details.get('ownerSite', '')
             
+            # 1. Пробуем стандартные ключи API
+            email = details.get('ownerEmail', '') or details.get('supportEmail', '')
+            
+            # 2. Если поля пустые, сканируем ВЕСЬ ответ сервера (включая полное описание)
             if not email:
-                emails_in_desc = re.findall(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", description)
-                if emails_in_desc:
-                    email = emails_in_desc[0]
+                all_emails = re.findall(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", details_str)
+                # Фильтруем случайные совпадения (например, файлы картинок)
+                valid_emails = [e for e in all_emails if not e.endswith(('.png', '.jpg', '.jpeg', '.webp'))]
+                
+                if valid_emails:
+                    email = valid_emails[0] # Берем первую найденную настоящую почту
 
             game_info = {
                 "Title": title,
