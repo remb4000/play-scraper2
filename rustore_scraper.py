@@ -201,13 +201,13 @@ for query in deep_queries:
                 print(f"Не 2026 год ({game_year}) ❌")
                 continue
 
-            # Проверка черного списка
+          # Проверка черного списка
             description = details.get('shortDescription', '').lower()
             if any(word in title.lower() or word in description for word in BLACKLIST):
                 print("В черном списке ❌")
                 continue
 
-         developer_name = details.get('companyName', '')
+            developer_name = details.get('companyName', '')
             website = details.get('ownerSite', '')
             
             # 1. Пробуем стандартные ключи API
