@@ -210,7 +210,7 @@ for query in deep_queries:
             developer_name = details.get('companyName', '')
             website = details.get('ownerSite', '')
             
-            # 1. Пробуем стандартные ключи API
+           # 1. Пробуем стандартные ключи API
             email = details.get('ownerEmail', '') or details.get('supportEmail', '')
             
             # 2. Если поля пустые, сканируем ВЕСЬ ответ сервера (включая полное описание)
@@ -221,6 +221,24 @@ for query in deep_queries:
                 
                 if valid_emails:
                     email = valid_emails[0] # Берем первую найденную настоящую почту
+
+            # 🔥 НОВЫЙ ЖЕСТКИЙ ФИЛЬТР: ЕСЛИ ПОЧТУ ТАК И НЕ НАШЛИ - ПРОПУСКАЕМ ИГРУ
+            if not email:
+                print("Нет почты ❌")
+                continue
+
+            # Сохраняем только тех, кто прошел проверку
+            game_info = {
+                "Title": title,
+                "Developer": developer_name,
+                "Email": email,
+                "Website": website,
+                "Installs": installs,
+                "Rating": round(rating, 2),
+                "Reviews": reviews,
+                "Released": release_date_for_excel,
+                "URL": f"https://apps.rustore.ru/app/{package_name}"
+            }
 
             game_info = {
                 "Title": title,
